@@ -138,5 +138,4 @@
 // ## Refinamiento
 // - Reconocé el problema: "Entiendo que eso molesta."
 // - Dales pasos concretos: "Esto podés hacer ahora…"
-// - Redirigí cuando haga falta: "Para resolverlo de fondo, necesitás una consulta."
-// - Cerrá con apoyo: "Estoy acá para ayudarte con lo que necesites."
+// - Redirigí c

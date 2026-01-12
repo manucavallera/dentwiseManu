@@ -10,7 +10,7 @@ function Header() {
         <Link href='/' className='flex items-center gap-2'>
           <Image
             src={"/logo.png"}
-            alt='Logo de DentWise'
+            alt='DentWise Logo'
             width={32}
             height={32}
             className='w-11'
@@ -20,24 +20,24 @@ function Header() {
 
         <div className='hidden md:flex items-center gap-8'>
           <a href='#' className='text-muted-foreground hover:text-foreground'>
-            Cómo Funciona
+            How it Works
           </a>
           <a href='#' className='text-muted-foreground hover:text-foreground'>
-            Precios
+            Pricing
           </a>
           <a href='#' className='text-muted-foreground hover:text-foreground'>
-            Sobre Nosotros
+            About
           </a>
         </div>
 
         <div className='flex items-center gap-3'>
           <SignInButton mode='modal'>
             <Button variant={"ghost"} size={"sm"}>
-              Iniciar Sesión
+              Login
             </Button>
           </SignInButton>
           <SignUpButton mode='modal'>
-            <Button size={"sm"}>Crear Cuenta</Button>
+            <Button size={"sm"}>Sign Up</Button>
           </SignUpButton>
         </div>
       </div>

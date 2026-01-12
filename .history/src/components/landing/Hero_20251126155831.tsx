@@ -57,14 +57,14 @@ function Hero() {
                 <SignUpButton mode='modal'>
                   <Button size={"lg"}>
                     <MicIcon className='mr-2 size-5' />
-                    Prueba el agente de voz
+                    Try voice agent
                   </Button>
                 </SignUpButton>
 
                 <SignUpButton mode='modal'>
                   <Button size={"lg"} variant={"outline"}>
                     <CalendarIcon className='mr-2 size-5' />
-                    Reservar cita
+                    Book appointment
                   </Button>
                 </SignUpButton>
               </div>

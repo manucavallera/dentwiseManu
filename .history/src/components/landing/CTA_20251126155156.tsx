@@ -26,13 +26,13 @@ function CTA() {
                 </span>
                 <br />
                 <span className='bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent'>
-                  El camino empieza aqui
+                  journey starts here
                 </span>
               </h2>
 
               <p className='text-lg text-muted-foreground leading-relaxed'>
-                Unete a 1,200+ pacientes que confian en la IA ,orientación
-                instantánea y atención personalizada.
+                Join 1,200+ patients who trust our AI for instant guidance and
+                personalized care.
               </p>
             </div>
 
@@ -43,7 +43,7 @@ function CTA() {
                 className='px-6 py-3 font-semibold bg-gradient-to-r from-primary to-primary/90 hover:from-primary/95 hover:to-primary/85 shadow-lg hover:shadow-xl transition-all duration-300 rounded-xl'
               >
                 <MicIcon className='mr-2 h-4 w-4' />
-                Empezar chat gratis
+                Start free chat
               </Button>
               <Button
                 size='lg'
@@ -51,7 +51,7 @@ function CTA() {
                 className='px-6 py-3 font-semibold border border-primary/20 hover:border-primary/40 hover:bg-primary/5 transition-all duration-300 rounded-xl'
               >
                 <CalendarIcon className='mr-2 h-4 w-4' />
-                Reservar cita
+                Book appointment
               </Button>
             </div>
           </div>
@@ -63,7 +63,7 @@ function CTA() {
               <div className='absolute -top-4 left-4 bg-gradient-to-r from-green-500/90 to-emerald-500/90 backdrop-blur-sm text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg z-10'>
                 <div className='flex items-center gap-1'>
                   <div className='w-1.5 h-1.5 bg-white rounded-full animate-pulse'></div>
-                  Disponible 24/7
+                  Available 24/7
                 </div>
               </div>
 

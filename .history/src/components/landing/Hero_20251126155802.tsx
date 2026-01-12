@@ -36,7 +36,7 @@ function Hero() {
                   </span>
                   <br />
                   <span className='bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent'>
-                    sobre salud dental
+                    sobre salud mental
                   </span>
                   <br />
                   <span className='bg-gradient-to-br from-foreground via-foreground to-foreground/70 bg-clip-text text-transparent'>
@@ -46,9 +46,9 @@ function Hero() {
 
                 {/* SUBTITLE */}
                 <p className='text-lg text-muted-foreground leading-relaxed max-w-xl font-medium'>
-                  Chatea con nuestro asistente dental con IA para obtener
-                  consejos instantáneos, agendar citas inteligentes y obtener
-                  recomendaciones de atención personalizadas. Disponible 24/7.
+                  Chat with our AI dental assistant for instant advice, book
+                  smart appointments, and get personalized care recommendations.
+                  Available 24/7.
                 </p>
               </div>
 
@@ -57,14 +57,14 @@ function Hero() {
                 <SignUpButton mode='modal'>
                   <Button size={"lg"}>
                     <MicIcon className='mr-2 size-5' />
-                    Prueba el agente de voz
+                    Try voice agent
                   </Button>
                 </SignUpButton>
 
                 <SignUpButton mode='modal'>
                   <Button size={"lg"} variant={"outline"}>
                     <CalendarIcon className='mr-2 size-5' />
-                    Reservar cita
+                    Book appointment
                   </Button>
                 </SignUpButton>
               </div>

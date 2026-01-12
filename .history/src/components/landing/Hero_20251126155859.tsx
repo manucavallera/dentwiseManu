@@ -64,7 +64,7 @@ function Hero() {
                 <SignUpButton mode='modal'>
                   <Button size={"lg"} variant={"outline"}>
                     <CalendarIcon className='mr-2 size-5' />
-                    Reservar cita
+                    Book appointment
                   </Button>
                 </SignUpButton>
               </div>
