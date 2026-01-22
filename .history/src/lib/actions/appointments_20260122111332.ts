@@ -175,30 +175,27 @@ export async function bookAppointment(input: BookAppointmentInput) {
     // 3. ENVIAR EMAIL AUTOMÁTICAMENTE 📧
     // Esto ocurre en el servidor, así que es seguro.
     try {
-      // Definimos 'typeConfig' para buscar el precio y la duración
-      const typeConfig = APPOINTMENT_TYPES.find(
+      const appointmentType = APPOINTMENT_TYPES.find(
         (t) => t.name === appointment.reason,
       );
 
       await resend.emails.send({
-        from: "DentWise <no-reply@resend.dev>",
+        from: "DentWise <no-reply@resend.dev>", // Cambia esto si tienes dominio propio
         to: [user.email],
         subject: "Appointment Confirmation - DentWise",
         react: AppointmentConfirmationEmail({
           doctorName: appointment.doctor.name,
           appointmentDate: format(appointment.date, "EEEE, MMMM d, yyyy"),
           appointmentTime: appointment.time,
-
-          // Aquí pasamos el texto del tratamiento (con protección contra null)
           appointmentType: appointment.reason || "General Consultation",
 
-          // Aquí usamos 'typeConfig' que definimos arriba
-          duration: typeConfig?.duration || "30 min",
-          price: typeConfig?.price || "$0",
+          duration: appointmentTypeDetails?.duration || "30 min",
+          price: appointmentTypeDetails?.price || "$0",
         }),
       });
       console.log("Confirmation email sent to:", user.email);
     } catch (emailError) {
+      // Si el email falla, la cita SÍ se guardó, pero avisamos en consola.
       console.error("Failed to send confirmation email:", emailError);
     }
 

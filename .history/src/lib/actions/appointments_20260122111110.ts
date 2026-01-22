@@ -3,10 +3,7 @@
 import { auth } from "@clerk/nextjs/server";
 import { prisma } from "../prisma";
 import { AppointmentStatus } from "@prisma/client";
-import { APPOINTMENT_TYPES } from "@/lib/utils";
-import resend from "@/lib/resend"; // Importamos Resend
-import AppointmentConfirmationEmail from "@/components/emails/AppointmentConfirmationEmail"; // El template del email
-import { format } from "date-fns"; // Para formatear la fecha
+import { APPOINTMENT_TYPES } from "@/lib/utils"; // Asegúrate de que esto se importe bien
 
 // Helper para convertir "09:00" -> minutos desde medianoche
 const timeToMinutes = (time: string) => {
@@ -37,11 +34,14 @@ export async function getAppointments() {
   try {
     const appointments = await prisma.appointment.findMany({
       include: {
-        user: { select: { firstName: true, lastName: true, email: true } },
+        user: {
+          select: { firstName: true, lastName: true, email: true },
+        },
         doctor: { select: { name: true, imageUrl: true } },
       },
       orderBy: { createdAt: "desc" },
     });
+
     return appointments.map(transformAppointment);
   } catch (error) {
     console.log("Error fetching appointments:", error);
@@ -65,6 +65,7 @@ export async function getUserAppointments() {
       },
       orderBy: [{ date: "asc" }, { time: "asc" }],
     });
+
     return appointments.map(transformAppointment);
   } catch (error) {
     console.error("Error fetching user appointments:", error);
@@ -97,6 +98,7 @@ export async function getUserAppointmentStats() {
   }
 }
 
+// 🔥 LÓGICA CORE: Devuelve TODOS los slots ocupados (expandiendo duración)
 export async function getBookedTimeSlots(doctorId: string, date: string) {
   try {
     const appointments = await prisma.appointment.findMany({
@@ -105,19 +107,25 @@ export async function getBookedTimeSlots(doctorId: string, date: string) {
         date: new Date(date),
         status: { in: ["CONFIRMED", "COMPLETED"] },
       },
-      select: { time: true, reason: true },
+      select: { time: true, reason: true }, // Necesitamos la razón para saber la duración
     });
 
     const bookedSlots = new Set<string>();
 
     appointments.forEach((appt) => {
+      // 1. Buscar la duración según el tipo de cita
       const type = APPOINTMENT_TYPES.find((t) => t.name === appt.reason);
+
+      // IMPORTANTE: Asegúrate de que tu APPOINTMENT_TYPES tenga una propiedad numérica para duración.
+      // Si "duration" es string ("60 min"), usa parseInt. Si no, por defecto 30.
       const durationString = type?.duration || "30 min";
       const durationMinutes = parseInt(durationString);
 
+      // 2. Calcular cuántos bloques de 30 min ocupa
       const startMinutes = timeToMinutes(appt.time);
       const slotsCount = Math.ceil(durationMinutes / 30);
 
+      // 3. Marcar cada bloque como ocupado
       for (let i = 0; i < slotsCount; i++) {
         const currentSlotTime = minutesToTime(startMinutes + i * 30);
         bookedSlots.add(currentSlotTime);
@@ -147,7 +155,8 @@ export async function bookAppointment(input: BookAppointmentInput) {
       throw new Error("Missing fields");
     }
 
-    // 1. Doble check de seguridad (Evita doble reserva)
+    // 🔥 VALIDACIÓN DE SEGURIDAD (DOBLE CHECK)
+    // Antes de crear, verificamos si alguien nos ganó el lugar en el último segundo
     const bookedSlots = await getBookedTimeSlots(input.doctorId, input.date);
     if (bookedSlots.includes(input.time)) {
       throw new Error("This time slot was just taken. Please choose another.");
@@ -156,7 +165,6 @@ export async function bookAppointment(input: BookAppointmentInput) {
     const user = await prisma.user.findUnique({ where: { clerkId: userId } });
     if (!user) throw new Error("User not found");
 
-    // 2. Crear la cita en la Base de Datos
     const appointment = await prisma.appointment.create({
       data: {
         userId: user.id,
@@ -171,36 +179,6 @@ export async function bookAppointment(input: BookAppointmentInput) {
         doctor: { select: { name: true, imageUrl: true } },
       },
     });
-
-    // 3. ENVIAR EMAIL AUTOMÁTICAMENTE 📧
-    // Esto ocurre en el servidor, así que es seguro.
-    try {
-      // Definimos 'typeConfig' para buscar el precio y la duración
-      const typeConfig = APPOINTMENT_TYPES.find(
-        (t) => t.name === appointment.reason,
-      );
-
-      await resend.emails.send({
-        from: "DentWise <no-reply@resend.dev>",
-        to: [user.email],
-        subject: "Appointment Confirmation - DentWise",
-        react: AppointmentConfirmationEmail({
-          doctorName: appointment.doctor.name,
-          appointmentDate: format(appointment.date, "EEEE, MMMM d, yyyy"),
-          appointmentTime: appointment.time,
-
-          // Aquí pasamos el texto del tratamiento (con protección contra null)
-          appointmentType: appointment.reason || "General Consultation",
-
-          // Aquí usamos 'typeConfig' que definimos arriba
-          duration: typeConfig?.duration || "30 min",
-          price: typeConfig?.price || "$0",
-        }),
-      });
-      console.log("Confirmation email sent to:", user.email);
-    } catch (emailError) {
-      console.error("Failed to send confirmation email:", emailError);
-    }
 
     return transformAppointment(appointment);
   } catch (error: any) {

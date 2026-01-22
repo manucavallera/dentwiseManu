@@ -5,10 +5,10 @@ import { prisma } from "../prisma";
 import { AppointmentStatus } from "@prisma/client";
 import { APPOINTMENT_TYPES } from "@/lib/utils";
 import resend from "@/lib/resend"; // Importamos Resend
-import AppointmentConfirmationEmail from "@/components/emails/AppointmentConfirmationEmail"; // El template del email
-import { format } from "date-fns"; // Para formatear la fecha
+import AppointmentConfirmationEmail from "@/components/emails/AppointmentConfirmationEmail"; // Importamos el template
+import { format } from "date-fns"; // Necesario para formatear la fecha en el email
 
-// Helper para convertir "09:00" -> minutos desde medianoche
+// Helper para convertir "09:00" -> minutos
 const timeToMinutes = (time: string) => {
   const [hours, minutes] = time.split(":").map(Number);
   return hours * 60 + minutes;
@@ -147,7 +147,7 @@ export async function bookAppointment(input: BookAppointmentInput) {
       throw new Error("Missing fields");
     }
 
-    // 1. Doble check de seguridad (Evita doble reserva)
+    // 1. Doble check de seguridad
     const bookedSlots = await getBookedTimeSlots(input.doctorId, input.date);
     if (bookedSlots.includes(input.time)) {
       throw new Error("This time slot was just taken. Please choose another.");
@@ -156,7 +156,7 @@ export async function bookAppointment(input: BookAppointmentInput) {
     const user = await prisma.user.findUnique({ where: { clerkId: userId } });
     if (!user) throw new Error("User not found");
 
-    // 2. Crear la cita en la Base de Datos
+    // 2. Crear la cita en la DB
     const appointment = await prisma.appointment.create({
       data: {
         userId: user.id,
@@ -172,33 +172,29 @@ export async function bookAppointment(input: BookAppointmentInput) {
       },
     });
 
-    // 3. ENVIAR EMAIL AUTOMÁTICAMENTE 📧
-    // Esto ocurre en el servidor, así que es seguro.
+    // 3. ENVIAR EMAIL (Lógica movida aquí) 📧
     try {
-      // Definimos 'typeConfig' para buscar el precio y la duración
-      const typeConfig = APPOINTMENT_TYPES.find(
+      const appointmentType = APPOINTMENT_TYPES.find(
         (t) => t.name === appointment.reason,
       );
 
       await resend.emails.send({
-        from: "DentWise <no-reply@resend.dev>",
+        from: "DentWise <no-reply@resend.dev>", // Cambia esto si tienes dominio propio verificado
         to: [user.email],
         subject: "Appointment Confirmation - DentWise",
         react: AppointmentConfirmationEmail({
           doctorName: appointment.doctor.name,
           appointmentDate: format(appointment.date, "EEEE, MMMM d, yyyy"),
           appointmentTime: appointment.time,
-
-          // Aquí pasamos el texto del tratamiento (con protección contra null)
-          appointmentType: appointment.reason || "General Consultation",
-
-          // Aquí usamos 'typeConfig' que definimos arriba
-          duration: typeConfig?.duration || "30 min",
-          price: typeConfig?.price || "$0",
+          appointmentType: appointment.reason,
+          duration: appointmentType?.duration || "30 min",
+          price: appointmentType?.price || "$0",
         }),
       });
       console.log("Confirmation email sent to:", user.email);
     } catch (emailError) {
+      // Si falla el email, NO fallamos la reserva, pero lo logueamos.
+      // Podrías guardar un flag en la DB tipo 'emailSent: false' si quisieras reintentar luego.
       console.error("Failed to send confirmation email:", emailError);
     }
 
